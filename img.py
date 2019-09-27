@@ -10,13 +10,23 @@ from typing import List, Tuple, Union, Optional
 import numpy as np
 from PIL import Image
 
+# sizes in bytes
+FULLSCREEN_SIZE = 262144
+
+# dimensions
+FULLSCREEN_DIM = (512, 256)
+
 def linear_to_image_array(pixels:List[List[int]], size:Tuple[int,int]) -> np.ndarray:
+    """\
+Converts a linear array ( shape=(width*height, channels) ) into an array
+usable by PIL ( shape=(height, width, channels) )."""
     a = np.array(pixels, dtype=np.uint8)
     split = np.split(pixels, [i*size[0] for i in range(1,size[1])])
     return np.array(split, dtype=np.uint8)
 
 def bit_selector(number:int, start:int, end:int, normalise:bool=False) -> Union[int, float]:
-    """Select bits between start and end. Bit 0 is the least significant bit."""
+    """\
+Select bits between start and end. Bit 0 is the least significant bit."""
     val = (number>>start)&((2**(end-start+1))-1)
     if normalise:
         return val/((2**(end-start+1))-1)
@@ -73,7 +83,7 @@ Converts an image that should occupy the whole screen. These have a file size
 of 262144 bytes and dimensions of 512x256.
 """
     
-    return convert_IMG(read_IMG(fp, 262144), (512, 256), alpha)
+    return convert_IMG(read_IMG(fp, FULLSCREEN_SIZE), FULLSCREEN_DIM, alpha)
 
 def convert_LOAD(fp:str, alpha:bool=False) -> Image.Image:
     """\
