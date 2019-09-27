@@ -1,0 +1,12 @@
+language: python
+python:
+ - "3.6"
+install:
+ - pip install -r requirements.txt
+ - pip install -r testrequirements.txt
+script:
+ - nosetests -v --with-coverage test/
+ - CODECLIMATE_REPO_TOKEN=989e495a44416f0c0a6ba2e22adfdd797fdb3465a986258b77a31b5e4cf1ecaa codeclimate-test-reporter
+addons:
+ code_climate:
+  repo_token: 989e495a44416f0c0a6ba2e22adfdd797fdb3465a986258b77a31b5e4cf1ecaa
