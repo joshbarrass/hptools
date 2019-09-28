@@ -12,9 +12,13 @@ from PIL import Image
 
 # sizes in bytes
 FULLSCREEN_SIZE = 262144
+STORY_SIZE = 123392
+TEXT_SIZE = 72192
 
 # dimensions
 FULLSCREEN_DIM = (512, 256)
+STORY_DIM = (512, 240)
+TEXT_DIM = (448, 160)
 
 def linear_to_image_array(pixels:List[List[int]], size:Tuple[int,int]) -> np.ndarray:
     """\
@@ -32,7 +36,7 @@ Select bits between start and end. Bit 0 is the least significant bit."""
         return val/((2**(end-start+1))-1)
     return val
 
-def read_IMG(fp:str, filesize:Optional[int]=0) -> bytes:
+def read_IMG(fp:str, filesize:Optional[int]=None) -> bytes:
     """\
 Reads in the IMG file at fp, returning the contents as a bytes-type. If
 filesize is non-None, a ValueError will be raised if the size in bytes
@@ -77,6 +81,39 @@ Set alpha=True if you want to use the discard bit as an alpha mask."""
     img_type = "RGBA" if alpha else "RGB"
     return Image.fromarray(a, img_type)
 
+def convert_palette_IMG(data:bytes, size:Tuple[int,int], second_palette:bool=False) -> Image.Image:
+    """\
+Convert a .IMG file that utilises a palette into a PIL Image. The first
+512 bytes are 15-bit colours (the palette). After that, every value is
+an 8-bit value that maps to the palette.
+
+TODO: Second palette specifies whether the image has a second palette
+available at the end of the file. This is used in things like the sky
+images, as an "animation" palette for the lightning strike. Enabling
+this will use the second palette instead of the primary palette."""
+
+    # read in the palette
+    palette = []
+    for i in range(0, 512, 2):
+        number = struct.unpack("H", data[i:i+2])[0]
+        r = int(round(bit_selector(number, 0, 4, True)*255))
+        g = int(round(bit_selector(number, 5, 9, True)*255))
+        b = int(round(bit_selector(number, 10, 14, True)*255))
+        colour = [r,g,b]
+        palette += colour # the palette has to be flat, i.e. [r,g,b,r,g,b...]
+        
+    # read in the pixels
+    pixels = []
+    for i in range(512, len(data), 1):
+        number = struct.unpack("B", data[i:i+1])[0]
+        pixels.append(number)
+
+    a = linear_to_image_array(pixels, size)
+    img_type = "P"
+    im = Image.fromarray(a, img_type)
+    im.putpalette(palette)
+    return im
+
 def convert_fullscreen(fp:str, alpha:bool=False) -> Image.Image:
     """\
 Converts an image that should occupy the whole screen. These have a file size
@@ -91,3 +128,15 @@ Converts a loading screen image (LOADxx.IMG). This is an alias for
 convert_fullscreen.
 """
     return convert_fullscreen(fp, alpha)
+
+def convert_STORY(fp:str) -> Image.Image:
+    """\
+Converts a story image (STORYxxx.IMG).
+"""
+    return convert_palette_IMG(read_IMG(fp, STORY_SIZE), STORY_DIM)
+
+def convert_TEXT(fp:str) -> Image.Image:
+    """\
+Converts a title text image (XX_TEXT.IMG).
+"""
+    return convert_palette_IMG(read_IMG(fp, TEXT_SIZE), TEXT_DIM)
