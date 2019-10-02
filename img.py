@@ -178,15 +178,15 @@ Converts a PIL image into a palette IMG file.
     palette_bytes = im.palette.getdata()[1]
     palette = [(palette_bytes[i], palette_bytes[i+1], palette_bytes[i+2]) for i in range(0, len(palette_bytes), 3)]
     HP_palette = palette[::-1]
-    
+
     # write the palette to the raw_data
     raw_data = b""
     for colour in HP_palette:
-        n = colour[2]
+        n = int((colour[2]/255)*31)
         n = n << 5
-        n += colour[1]
+        n += int((colour[1]/255)*31)
         n = n << 5
-        n += colour[0]
+        n += int((colour[0]/255)*31)
 
         raw_data += struct.pack("H", n)
 
