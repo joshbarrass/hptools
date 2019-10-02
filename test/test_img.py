@@ -37,11 +37,18 @@ class ImgTests(unittest.TestCase):
     def test_convert_IMG(self):
         orig_im = Image.open(os.path.join(test_dir, "test.tif")).convert("RGB")
         im = img.convert_IMG(img.read_IMG(os.path.join(test_dir, "test.testimg")), orig_im.size)
+        self.assertImagesAreEqual(im, orig_im)
 
-        self.assertEqual(im.size, orig_im.size)
+    def test_convert_palette_IMG(self):
+        orig_im = Image.open(os.path.join(test_dir, "test.tif")).convert("RGB")
+        im = img.convert_palette_IMG(img.read_IMG(os.path.join(test_dir, "test.testpimg")), orig_im.size).convert("RGB")
+        self.assertImagesAreEqual(im, orig_im)
 
-        im_pix = im.load()
-        orig_pix = orig_im.load()
-        for y in range(im.size[1]):
-            for x in range(im.size[0]):
-                self.assertEqual(im_pix[x,y], orig_pix[x,y])
+    def assertImagesAreEqual(self, im1, im2):
+        self.assertEqual(im1.size, im2.size)
+
+        im1_pix = im1.load()
+        im2_pix = im2.load()
+        for y in range(im1.size[1]):
+            for x in range(im1.size[0]):
+                self.assertEqual(im1_pix[x,y], im2_pix[x,y])
