@@ -140,3 +140,61 @@ def convert_TEXT(fp:str) -> Image.Image:
 Converts a title text image (XX_TEXT.IMG).
 """
     return convert_palette_IMG(read_IMG(fp, TEXT_SIZE), TEXT_DIM)
+
+def convert_to_IMG(im:Image.Image, fp:str):
+    """\
+Converts a PIL image into a non-palette IMG file.
+"""
+    # convert the IMG to RGB
+    im = im.convert("RGB")
+
+    # convert to numpy array
+    a = np.array(im)
+    
+    # scale each channel to 5-bit
+    scaled = np.round((a/255)*31).astype(np.uint8)
+
+    # convert to raw bytes and write to file
+    raw_data = b""
+    for y in range(scaled.shape[0]):
+        for x in range(scaled.shape[1]):
+            n = scaled[y,x,2]
+            n = n << 5
+            n += scaled[y,x,1]
+            n = n << 5
+            n += scaled[y,x,0]
+
+            raw_data += struct.pack("H", n)
+            
+    with open(fp, "wb") as f:
+        f.write(raw_data)
+
+def convert_to_palette_IMG(im:Image.Image, fp:str):
+    """\
+Converts a PIL image into a palette IMG file.
+"""
+    # convert the IMG to a palette
+    im = im.convert("P", palette=Image.ADAPTIVE, colors=255)
+    palette_bytes = im.palette.getdata()[1]
+    palette = [(palette_bytes[i], palette_bytes[i+1], palette_bytes[i+2]) for i in range(0, len(palette_bytes), 3)]
+    HP_palette = palette[::-1]
+    
+    # write the palette to the raw_data
+    raw_data = b""
+    for colour in HP_palette:
+        n = colour[2]
+        n = n << 5
+        n += colour[1]
+        n = n << 5
+        n += colour[0]
+
+        raw_data += struct.pack("H", n)
+
+    # write the image to the raw_data
+    pix = im.load()
+    for y in range(im.size[1]):
+        for x in range(im.size[0]):
+            raw_data += struct.pack("B", HP_palette.index(palette[pix[x,y]]))
+
+    with open(fp, "wb") as f:
+        f.write(raw_data)
