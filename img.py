@@ -93,7 +93,7 @@ images, as an "animation" palette for the lightning strike. Enabling
 this will use the second palette instead of the primary palette."""
 
     # read in the palette
-    palette = []
+    palette = [] # type: List[int]
     for i in range(0, 512, 2):
         number = struct.unpack("H", data[i:i+2])[0]
         r = int(round(bit_selector(number, 0, 4, True)*255))
