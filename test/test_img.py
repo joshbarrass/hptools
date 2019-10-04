@@ -1,5 +1,6 @@
 import unittest
 import os
+import shutil, tempfile
 
 from PIL import Image
 
@@ -8,6 +9,12 @@ import img
 test_dir = os.path.dirname(__file__)
 
 class ImgTests(unittest.TestCase):
+    def setUp(self):
+        self.temp_dir = tempfile.mkdtemp()
+
+    def tearDown(self):
+        shutil.rmtree(self.temp_dir)
+
     def test_bit_selector(self):
         n = 0b111100101000
         self.assertEqual(img.bit_selector(n, 0, 3), 8)
@@ -52,3 +59,28 @@ class ImgTests(unittest.TestCase):
         for y in range(im1.size[1]):
             for x in range(im1.size[0]):
                 self.assertEqual(im1_pix[x,y], im2_pix[x,y])
+
+    def test_convert_to_IMG(self):
+        im = Image.open(os.path.join(test_dir, "test.tif"))
+        img.convert_to_IMG(im, os.path.join(self.temp_dir, "new.img"))
+        self.assertFilesAreEqual(os.path.join(test_dir, "test.testimg"),
+                                 os.path.join(self.temp_dir, "new.img"))
+
+    def test_convert_to_palette_IMG(self):
+        im = Image.open(os.path.join(test_dir, "test.tif"))
+        img.convert_to_palette_IMG(im, os.path.join(self.temp_dir, "new.img"))
+        self.assertFilesAreEqual(os.path.join(test_dir, "test.testpimg"),
+                                 os.path.join(self.temp_dir, "new.img"))
+
+    def assertFilesAreEqual(self, fp1, fp2, chunksize=4096):
+        # check file sizes
+        self.assertEqual(os.path.getsize(fp1), os.path.getsize(fp2))
+
+        with open(fp1, "rb") as f1:
+            with open(fp2, "rb") as f2:
+                data1 = b"."
+                data2 = b"."
+                while data1 != b"": # don't need to check both since they're same size
+                    data1 = f1.read(chunksize)
+                    data2 = f2.read(chunksize)
+                    self.assertEqual(data1, data2)
