@@ -1,0 +1,15 @@
+# Extracts .DAT/.DIR files from Harry Potter PS1 games.
+# Give the path to the .DIR file
+#
+# script for QuickBMS http://quickbms.aluigi.org
+
+endian little
+get FILES long
+open FDDE DAT 1
+for i = 0 < FILES
+    getdstring FILENAME 12
+    get FILESIZE long
+    get OFFSET long
+
+    log FILENAME OFFSET FILESIZE 1
+next i
