@@ -1,5 +1,6 @@
 # Extracts .DAT/.DIR files from Harry Potter PS1 games.
 # Give the path to the .DIR file
+# By Joshua Barrass
 #
 # script for QuickBMS http://quickbms.aluigi.org
 
