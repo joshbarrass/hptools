@@ -23,13 +23,14 @@ class Face(object):
     
         
 class Model(object):
-    def __init__(self, vertices, normals, faces):
+    def __init__(self, vertices, normals, faces, groups=0):
         """\
 Stores the data for a model and provides functions for exporting it
 """
         self.verts = vertices
         self.norms = normals
         self.faces = faces
+        self.groups = groups
 
     def __repr__(self):
         out = "{package}.Model({v} vertices, {n} normals, {f} faces)"
