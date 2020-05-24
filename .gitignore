@@ -172,3 +172,10 @@ dmypy.json
 # Ignore any copies of the image files I may have left in the source dir
 *.img
 *.IMG
+
+# Ignore objects
+*.obj
+
+# Ignore original WADs
+*.WAD
+*.wad
