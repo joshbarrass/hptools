@@ -32,14 +32,15 @@ applied to the correct vertex groups.
         for i in range(len(verts)):
             group = verts[i].group
             sf = self.subframes[group]
-            v_rotated = sf.rot.apply(verts[i].r)
+            rot_matrix = sf.rot.as_dcm()
+            v_rotated = verts[i].r.dot(rot_matrix)
             v_rotated += sf.trans
             newvert = Vertex(v_rotated[0],
                              v_rotated[1],
                              v_rotated[2],
                              group)
             
-            n_rotated = sf.rot.apply(norms[i].r)
+            n_rotated = norms[i].r.dot(rot_matrix)
             newnorm = Normal(n_rotated[0],
                              n_rotated[1],
                              n_rotated[2],
@@ -62,8 +63,11 @@ Takes the rotation quaternion and translation vector
 in tuple or list format and converts them to rot
 objects.
 """
+        # rearrange the quaternion to [x,y,z,w]
+        w, x, y, z = quat
+        quat_fixed = np.array([x, y, z, w])
         # construct a scipy rotation object
-        rot = Rot.from_quat(quat)
+        rot = Rot.from_quat(quat_fixed)
         super().__init__(group, rot, trans)
         self.index = index
 

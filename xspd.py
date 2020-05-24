@@ -142,7 +142,7 @@ access to animations in future."""
         vertex = Vertex(x, y, z, self.current_group)
 
         # scale the models
-##        vertex.r /= 4096
+        vertex.r /= 4096
         
         grp_index = struct.unpack("<H", self.data.read(2))[0]
         if grp_index == 1:
@@ -158,11 +158,11 @@ access to animations in future."""
         # from inspecting the models in Blender, the
         # normals seem to point the wrong way, so we
         # invert them, too
-##        norm.r /= 4096
+        norm.r /= 4096
         norm.r *= -1
 
         grp_index = struct.unpack("<H", self.data.read(2))[0]
-        if grp_index == 0:
+        if grp_index == 1:
             self.current_group += 1
 
         return norm
@@ -266,17 +266,17 @@ possible to jump to the animations.
     def _read_new_subframe(self, group):
         # read the quaternion
         w, x, y, z = struct.unpack("<4h", self.data.read(2*4))
-##        w /= 4096
-##        x /= 4096
-##        y /= 4096
-##        z /= 4096
+        w /= 4096
+        x /= 4096
+        y /= 4096
+        z /= 4096
         #print([w,x,y,z])
 
         # read the translation vector
         tx, ty, tz = struct.unpack("<3h", self.data.read(2*3))
-##        tx /= 4096
-##        ty /= 4096
-##        tz /= 4096
+        tx /= 4096
+        ty /= 4096
+        tz /= 4096
 
         # frame index
         index = struct.unpack("<H", self.data.read(2))[0]
