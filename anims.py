@@ -46,7 +46,7 @@ applied to the correct vertex groups.
                              n_rotated[2],
                              group)
             newverts.append(newvert)
-            newnorms.append(newvert)
+            newnorms.append(newnorm)
         return Model(newverts, newnorms, model.faces[:], model.groups)
 
 class Subframe(object):
